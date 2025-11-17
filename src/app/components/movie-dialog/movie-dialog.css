@@ -1,0 +1,12 @@
+.movie-year {
+    color: #666;
+    margin: -10px 0 20px;
+  }
+  
+  .notes-field {
+    width: 100%;
+  }
+  
+  mat-dialog-content {
+    min-width: 400px;
+  }
