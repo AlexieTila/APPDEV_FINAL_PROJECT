@@ -1,0 +1,165 @@
+<div class="dashboard-container">
+  <!-- Search and Filter Section -->
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search movies...</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Enter movie title or keyword">
+      <mat-icon matPrefix>search</mat-icon>
+      <button
+        *ngIf="searchControl.value"
+        mat-icon-button
+        matSuffix
+        (click)="searchControl.setValue('')">
+        <mat-icon>clear</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <button mat-raised-button (click)="showFilters = !showFilters" class="filter-button">
+      <mat-icon>filter_list</mat-icon>
+      Filters
+    </button>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="filter-panel" *ngIf="showFilters">
+    <h3>Genres</h3>
+    <mat-chip-listbox class="genre-chips">
+      <mat-chip-option
+        *ngFor="let genre of allGenres"
+        [selected]="selectedGenres.includes(genre)"
+        (click)="toggleGenre(genre)">
+        {{ genre }}
+      </mat-chip-option>
+    </mat-chip-listbox>
+
+    <div class="filter-actions">
+      <button mat-button (click)="clearFilters()">Clear Filters</button>
+      <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Latest Releases Section -->
+  <section class="movie-section" *ngIf="!searchControl.value && filteredMovies.length === 0 && !loading">
+    <h2>Latest Releases</h2>
+    <div class="movie-grid">
+      <mat-card *ngFor="let movie of latestMovies" class="movie-card" (click)="viewMovie(movie.id)">
+        <div class="card-image-container">
+          <img mat-card-image [src]="movie.poster" [alt]="movie.title">
+          <div class="card-overlay">
+            <button
+              mat-icon-button
+              class="action-button favorite-button"
+              [class.favorited]="isFavorite(movie.id)"
+              (click)="toggleFavorite(movie, $event)"
+              matTooltip="Add to favorites">
+              <mat-icon>{{ isFavorite(movie.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              class="action-button"
+              (click)="addToFolder(movie, $event)"
+              matTooltip="Add to folder">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
+        <mat-card-content>
+          <h3 class="movie-title">{{ movie.title }}</h3>
+          <div class="movie-info">
+            <span class="movie-year">{{ movie.releaseDate | date: 'yyyy' }}</span>
+            <span class="movie-rating">
+              <mat-icon>star</mat-icon>
+              {{ movie.rating | number: '1.1-1' }}
+            </span>
+          </div>
+          <div class="movie-genres">
+            <mat-chip *ngFor="let genre of movie.genres.slice(0, 2)">{{ genre }}</mat-chip>
+          </div>
+          <div class="rating-buttons">
+            <button
+              mat-icon-button
+              [class.active]="movie.userRating === 'up'"
+              (click)="rateMovie(movie, 'up', $event)"
+              matTooltip="Like">
+              <mat-icon>thumb_up</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              [class.active]="movie.userRating === 'down'"
+              (click)="rateMovie(movie, 'down', $event)"
+              matTooltip="Dislike">
+              <mat-icon>thumb_down</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- Suggested Movies Section -->
+  <section class="movie-section" *ngIf="!loading">
+    <h2>{{ searchControl.value || selectedGenres.length > 0 ? 'Search Results' : 'Suggested for You' }}</h2>
+    <div class="movie-grid" *ngIf="getDisplayedMovies().length > 0">
+      <mat-card *ngFor="let movie of getDisplayedMovies()" class="movie-card" (click)="viewMovie(movie.id)">
+        <div class="card-image-container">
+          <img mat-card-image [src]="movie.poster" [alt]="movie.title">
+          <div class="card-overlay">
+            <button
+              mat-icon-button
+              class="action-button favorite-button"
+              [class.favorited]="isFavorite(movie.id)"
+              (click)="toggleFavorite(movie, $event)"
+              matTooltip="Add to favorites">
+              <mat-icon>{{ isFavorite(movie.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              class="action-button"
+              (click)="addToFolder(movie, $event)"
+              matTooltip="Add to folder">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
+        <mat-card-content>
+          <h3 class="movie-title">{{ movie.title }}</h3>
+          <div class="movie-info">
+            <span class="movie-year">{{ movie.releaseDate | date: 'yyyy' }}</span>
+            <span class="movie-rating">
+              <mat-icon>star</mat-icon>
+              {{ movie.rating | number: '1.1-1' }}
+            </span>
+          </div>
+          <div class="movie-genres">
+            <mat-chip *ngFor="let genre of movie.genres.slice(0, 2)">{{ genre }}</mat-chip>
+          </div>
+          <div class="rating-buttons">
+            <button
+              mat-icon-button
+              [class.active]="movie.userRating === 'up'"
+              (click)="rateMovie(movie, 'up', $event)"
+              matTooltip="Like">
+              <mat-icon>thumb_up</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              [class.active]="movie.userRating === 'down'"
+              (click)="rateMovie(movie, 'down', $event)"
+              matTooltip="Dislike">
+              <mat-icon>thumb_down</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="no-results" *ngIf="getDisplayedMovies().length === 0 && !loading">
+      <mat-icon>movie_filter</mat-icon>
+      <p>No movies found. Try adjusting your search or filters.</p>
+    </div>
+  </section>
+</div>

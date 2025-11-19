@@ -1,0 +1,152 @@
+<div class="folders-container">
+  <div class="header">
+    <h1>My Folders</h1>
+    <button mat-raised-button color="primary" (click)="showCreateForm = !showCreateForm">
+      <mat-icon>{{ showCreateForm ? 'close' : 'add' }}</mat-icon>
+      {{ showCreateForm ? 'Cancel' : 'New Folder' }}
+    </button>
+  </div>
+
+  <!-- Create/Edit Folder Form -->
+  <mat-card class="folder-form" *ngIf="showCreateForm">
+    <mat-card-content>
+      <h2>{{ editingFolder ? 'Edit Folder' : 'Create New Folder' }}</h2>
+      <form [formGroup]="folderForm" (ngSubmit)="editingFolder ? updateFolder() : createFolder()">
+        <mat-form-field appearance="outline">
+          <mat-label>Folder Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g., Action Movies">
+          <mat-icon matPrefix>folder</mat-icon>
+          <mat-error *ngIf="folderForm.get('name')?.hasError('required')">
+            Folder name is required
+          </mat-error>
+          <mat-error *ngIf="folderForm.get('name')?.hasError('minlength')">
+            Name must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="3"
+            placeholder="Describe what movies you'll add to this folder..."></textarea>
+          <mat-error *ngIf="folderForm.get('description')?.hasError('required')">
+            Description is required
+          </mat-error>
+        </mat-form-field>
+
+        <div class="color-picker">
+          <label>Folder Color</label>
+          <div class="color-options">
+            <button
+              type="button"
+              *ngFor="let color of colors"
+              class="color-option"
+              [class.selected]="folderForm.get('color')?.value === color"
+              [style.background-color]="color"
+              (click)="folderForm.patchValue({ color: color })">
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="folderForm.invalid">
+            {{ editingFolder ? 'Update' : 'Create' }} Folder
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Folders Grid -->
+  <div class="folders-grid" *ngIf="!loading && folders.length > 0">
+    <mat-card *ngFor="let folder of folders" class="folder-card" [style.border-left-color]="folder.color">
+      <mat-card-header>
+        <div class="folder-header">
+          <div class="folder-icon" [style.background-color]="folder.color">
+            <mat-icon>folder</mat-icon>
+          </div>
+          <div class="folder-info">
+            <mat-card-title>{{ folder.name }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ getFolderMovieCount(folder.id) }} movie{{ getFolderMovieCount(folder.id) !== 1 ? 's' : '' }}
+            </mat-card-subtitle>
+          </div>
+          <div class="folder-actions">
+            <button mat-icon-button (click)="startEdit(folder)" matTooltip="Edit folder">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="deleteFolder(folder, $event)" matTooltip="Delete folder">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p class="folder-description">{{ folder.description }}</p>
+
+        <mat-expansion-panel *ngIf="getFolderMovieCount(folder.id) > 0">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              View Movies ({{ getFolderMovieCount(folder.id) }})
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="folder-movies">
+            <div
+              *ngFor="let movie of getFolderMovies(folder.id)"
+              class="movie-item"
+              (click)="viewMovie(movie.id)">
+              <img [src]="movie.poster" [alt]="movie.title" class="movie-thumbnail">
+              <div class="movie-details">
+                <h4>{{ movie.title }}</h4>
+                <p>{{ movie.releaseDate | date: 'yyyy' }} • {{ movie.rating | number: '1.1-1' }}/10</p>
+              </div>
+              <button
+                mat-icon-button
+                (click)="removeMovieFromFolder(folder.id, movie.id, $event)"
+                matTooltip="Remove from folder">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <div class="empty-folder" *ngIf="getFolderMovieCount(folder.id) === 0">
+          <mat-icon>movie_filter</mat-icon>
+          <p>No movies in this folder yet</p>
+          <button mat-button color="primary" routerLink="/dashboard">
+            Browse Movies
+          </button>
+        </div>
+      </mat-card-content>
+
+      <mat-card-footer>
+        <span class="folder-date">Created {{ folder.createdAt | date: 'MMM d, yyyy' }}</span>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && folders.length === 0">
+    <mat-icon>folder_open</mat-icon>
+    <h2>No folders yet</h2>
+    <p>Create folders to organize your movie collection!</p>
+    <button mat-raised-button color="primary" (click)="showCreateForm = true">
+      <mat-icon>add</mat-icon>
+      Create Your First Folder
+    </button>
+  </div>
+</div>
