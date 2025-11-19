@@ -1,0 +1,112 @@
+<div class="movie-detail-dialog" *ngIf="movie">
+  <!-- Close Button -->
+  <button mat-icon-button class="close-btn" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <div class="dialog-content">
+    <!-- Left Side - Poster -->
+    <div class="poster-section">
+      <img [src]="movie.poster_path" 
+           [alt]="movie.title"
+           class="movie-poster"
+           (error)="$event.target.src='https://via.placeholder.com/400x600/1A1F3A/8B5CF6?text=No+Poster'">
+      
+      <!-- Rating Badge -->
+      <div class="rating-display">
+        <mat-icon class="star-icon">star</mat-icon>
+        <span class="rating-value">{{ movie.vote_average.toFixed(1) }}</span>
+        <span class="rating-max">/10</span>
+      </div>
+    </div>
+
+    <!-- Right Side - Details -->
+    <div class="details-section">
+      <!-- Title and Year -->
+      <div class="title-section">
+        <h1 class="movie-title">{{ movie.title }}</h1>
+        <span class="movie-year">{{ getYear() }}</span>
+      </div>
+
+      <!-- Genres -->
+      <div class="genres-section">
+        <mat-chip-set>
+          <mat-chip *ngFor="let genre of movie.genres" class="genre-chip">
+            {{ genre.name }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button mat-raised-button 
+                color="primary" 
+                class="action-btn favorite-btn"
+                (click)="toggleFavorite()"
+                [class.active]="isFavorite">
+          <mat-icon>{{ isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+          {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
+        </button>
+
+        <button mat-icon-button 
+                class="icon-action-btn thumbs-up-btn"
+                (click)="onThumbsUp()"
+                [class.active]="hasThumbsUp"
+                matTooltip="Thumbs Up">
+          <mat-icon>thumb_up</mat-icon>
+        </button>
+
+        <button mat-icon-button 
+                class="icon-action-btn thumbs-down-btn"
+                (click)="onThumbsDown()"
+                [class.active]="hasThumbsDown"
+                matTooltip="Thumbs Down">
+          <mat-icon>thumb_down</mat-icon>
+        </button>
+
+        <button mat-icon-button 
+                class="icon-action-btn folder-btn"
+                (click)="addToFolder()"
+                matTooltip="Add to Folder">
+          <mat-icon>create_new_folder</mat-icon>
+        </button>
+      </div>
+
+      <!-- Overview -->
+      <div class="overview-section">
+        <h3 class="section-title">Overview</h3>
+        <p class="overview-text">{{ movie.overview }}</p>
+      </div>
+
+      <!-- Director -->
+      <div class="info-row" *ngIf="movie.director">
+        <span class="info-label">Director:</span>
+        <span class="info-value">{{ movie.director }}</span>
+      </div>
+
+      <!-- Cast -->
+      <div class="info-row" *ngIf="movie.cast && movie.cast.length > 0">
+        <span class="info-label">Cast:</span>
+        <span class="info-value">{{ getCastNames() }}</span>
+      </div>
+
+      <!-- Streaming Providers -->
+      <div class="streaming-section" *ngIf="streamingProviders.length > 0">
+        <h3 class="section-title">Where to Watch</h3>
+        <div class="streaming-providers">
+          <mat-chip-set>
+            <mat-chip *ngFor="let provider of streamingProviders" class="provider-chip">
+              {{ provider.provider_name }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+
+      <!-- No Streaming Info -->
+      <div class="streaming-section" *ngIf="streamingProviders.length === 0">
+        <h3 class="section-title">Where to Watch</h3>
+        <p class="no-streaming-info">Streaming information not available</p>
+      </div>
+    </div>
+  </div>
+</div>

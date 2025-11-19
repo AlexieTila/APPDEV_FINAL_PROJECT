@@ -1,0 +1,141 @@
+<div class="movie-list-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- App Header -->
+    <div class="sidebar-header">
+      <div class="app-logo">
+        <mat-icon class="logo-icon">movie</mat-icon>
+        <h2 class="app-title">CinemaHub</h2>
+      </div>
+      <p class="welcome-text">Welcome, {{ username }}!</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <h3 class="section-title">
+        <mat-icon>search</mat-icon>
+        Search Movies
+      </h3>
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <input matInput 
+                 [(ngModel)]="searchQuery" 
+                 (keyup.enter)="searchMovies()" 
+                 placeholder="Enter movie title...">
+          <mat-icon matSuffix class="search-icon" (click)="searchMovies()" style="cursor: pointer;">search</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="sidebar-section">
+      <h3 class="section-title">
+        <mat-icon>menu</mat-icon>
+        Navigation
+      </h3>
+      <nav class="sidebar-nav">
+        <a routerLink="/movies" routerLinkActive="active" class="nav-item">
+          <mat-icon>movie</mat-icon>
+          <span>All Movies</span>
+        </a>
+        <a routerLink="/favorites" class="nav-item">
+          <mat-icon>favorite</mat-icon>
+          <span>My Favorites</span>
+        </a>
+        <a routerLink="/profile" class="nav-item">
+          <mat-icon>person</mat-icon>
+          <span>My Profile</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Genre Filter -->
+    <div class="sidebar-section">
+      <h3 class="section-title">
+        <mat-icon>category</mat-icon>
+        Filter by Genre
+      </h3>
+      <mat-form-field appearance="outline" class="genre-select">
+        <mat-select [(ngModel)]="selectedGenre" (selectionChange)="filterByGenre()" placeholder="All Genres">
+          <mat-option value="">All Genres</mat-option>
+          <mat-option value="28">Action</mat-option>
+          <mat-option value="35">Comedy</mat-option>
+          <mat-option value="18">Drama</mat-option>
+          <mat-option value="27">Horror</mat-option>
+          <mat-option value="878">Sci-Fi</mat-option>
+          <mat-option value="53">Thriller</mat-option>
+          <mat-option value="10749">Romance</mat-option>
+          <mat-option value="16">Animation</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="sidebar-footer">
+      <button mat-raised-button class="logout-btn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title gradient-text">Discover Movies</h1>
+        <p class="page-subtitle">Explore thousands of movies and find your next favorite</p>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filter-tabs">
+        <button class="filter-tab" [class.active]="currentFilter === 'popular'" (click)="loadPopularMovies()">
+          <mat-icon>trending_up</mat-icon>
+          <span>Popular</span>
+        </button>
+        <button class="filter-tab" [class.active]="currentFilter === 'latest'" (click)="loadLatestMovies()">
+          <mat-icon>new_releases</mat-icon>
+          <span>Latest</span>
+        </button>
+        <button class="filter-tab" [class.active]="currentFilter === 'topRated'" (click)="loadTopRated()">
+          <mat-icon>star</mat-icon>
+          <span>Top Rated</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Movies Grid -->
+    <div class="movies-grid" *ngIf="movies.length > 0 && !isLoading">
+      <app-movie-card 
+        *ngFor="let movie of movies; trackBy: trackByMovieId" 
+        [movie]="movie"
+        (favorite)="addToFavorites($event)"
+        (thumbsUp)="onThumbsUp($event)"
+        (thumbsDown)="onThumbsDown($event)"
+        (addToFolder)="onAddToFolder($event)"
+        (play)="onPlayMovie($event)">
+      </app-movie-card>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-spinner">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Loading amazing movies...</p>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && movies.length === 0">
+      <mat-icon class="empty-icon">movie_filter</mat-icon>
+      <h2>No Movies Found</h2>
+      <p>Try adjusting your search or filters</p>
+      <button mat-raised-button color="primary" (click)="loadPopularMovies()">
+        Browse Popular Movies
+      </button>
+    </div>
+  </main>
+</div>

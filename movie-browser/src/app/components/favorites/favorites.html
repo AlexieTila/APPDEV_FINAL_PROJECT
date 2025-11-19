@@ -1,0 +1,36 @@
+<div class="favorites-container">
+  <!-- Header -->
+  <div class="favorites-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">favorite</mat-icon>
+      <div class="header-text">
+        <h1 class="page-title gradient-text">My Favorites</h1>
+        <p class="page-subtitle">{{ favorites.length }} movie{{ favorites.length !== 1 ? 's' : '' }} in your collection</p>
+      </div>
+    </div>
+    <button mat-raised-button routerLink="/movies" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Movies
+    </button>
+  </div>
+
+  <!-- Favorites Grid -->
+  <div class="favorites-grid" *ngIf="favorites.length > 0">
+    <app-movie-card 
+      *ngFor="let movie of favorites; trackBy: trackByMovieId" 
+      [movie]="movie"
+      (favorite)="removeFromFavorites($event)">
+    </app-movie-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="favorites.length === 0">
+    <mat-icon class="empty-icon">favorite_border</mat-icon>
+    <h2>No Favorites Yet</h2>
+    <p>Start adding movies to your favorites by clicking the heart icon on any movie card</p>
+    <button mat-raised-button color="primary" routerLink="/movies">
+      <mat-icon>explore</mat-icon>
+      Discover Movies
+    </button>
+  </div>
+</div>

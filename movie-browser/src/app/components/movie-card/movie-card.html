@@ -1,0 +1,66 @@
+<div class="movie-card" (click)="openMovieDetail()">
+  <!-- Poster Image -->
+  <div class="poster-container">
+    <img [src]="movie.poster_path" 
+         [alt]="movie.title"
+         class="poster-image"
+         loading="lazy"
+         (error)="$event.target.src='https://via.placeholder.com/500x750/1A1F3A/8B5CF6?text=No+Poster'">
+    
+    <!-- Rating Badge -->
+    <div class="rating-badge">
+      <mat-icon class="star-icon">star</mat-icon>
+      <span>{{ movie.vote_average.toFixed(1) || 'N/A' }}</span>
+    </div>
+    
+    <!-- Hover Overlay -->
+    <div class="hover-overlay">
+      <button mat-mini-fab class="action-btn play-btn" (click)="onPlay($event)">
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Card Content -->
+  <div class="card-content">
+    <h3 class="movie-title">{{ movie.title }}</h3>
+    
+    <div class="movie-meta">
+      <span class="release-year">{{ movie.release_date | date:'yyyy' }}</span>
+      <span class="separator">•</span>
+      <span class="genre">{{ movie.genres?.[0]?.name || 'Movie' }}</span>
+    </div>
+    
+    <p class="movie-overview">{{ movie.overview | slice:0:120 }}{{ (movie.overview && movie.overview.length > 120) ? '...' : '' }}</p>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="icon-btn favorite-btn" 
+              (click)="onFavorite($event)"
+              [class.active]="isFavorite"
+              matTooltip="Add to Favorites">
+        <mat-icon>{{ isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+      </button>
+      
+      <button mat-icon-button class="icon-btn thumbs-up-btn" 
+              (click)="onThumbsUp($event)"
+              [class.active]="hasThumbsUp"
+              matTooltip="Thumbs Up">
+        <mat-icon>thumb_up</mat-icon>
+      </button>
+      
+      <button mat-icon-button class="icon-btn thumbs-down-btn" 
+              (click)="onThumbsDown($event)"
+              [class.active]="hasThumbsDown"
+              matTooltip="Thumbs Down">
+        <mat-icon>thumb_down</mat-icon>
+      </button>
+      
+      <button mat-icon-button class="icon-btn add-btn" 
+              (click)="onAddToFolder($event)"
+              matTooltip="Add to Folder">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

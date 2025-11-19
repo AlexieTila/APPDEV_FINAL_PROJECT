@@ -1,0 +1,330 @@
+<div class="profile-container">
+  <!-- Back to Home Button -->
+  <div class="back-button-container">
+    <button mat-raised-button routerLink="/movies" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Home
+    </button>
+  </div>
+
+  <!-- Profile Header with Better Visibility -->
+  <div class="profile-header">
+    <div class="profile-avatar-section">
+      <div class="profile-avatar" (click)="triggerFileInput()">
+        <img *ngIf="user?.profilePicture" [src]="user?.profilePicture" alt="Profile" class="avatar-image">
+        <mat-icon *ngIf="!user?.profilePicture" class="avatar-icon">person</mat-icon>
+        <div class="avatar-overlay" *ngIf="user?.profilePicture">
+          <mat-icon>camera_alt</mat-icon>
+          <span>Change Photo</span>
+        </div>
+      </div>
+      <input #fileInput type="file" accept="image/*" (change)="onProfilePictureChange($event)" style="display: none;">
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name">{{ user?.username }}</h1>
+      <p class="profile-subtitle">Movie Enthusiast</p>
+      <div class="profile-actions">
+        <button mat-stroked-button (click)="triggerFileInput()">
+          <mat-icon>photo_camera</mat-icon>
+          Upload Photo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon-wrapper favorites-stat">
+          <mat-icon>favorite</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ user?.favorites?.length || 0 }}</h3>
+          <p class="stat-label">Favorite Movies</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon-wrapper folders-stat">
+          <mat-icon>folder</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ user?.folders?.length || 0 }}</h3>
+          <p class="stat-label">Collections</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon-wrapper reviews-stat">
+          <mat-icon>rate_review</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ user?.reviews?.length || 0 }}</h3>
+          <p class="stat-label">Reviews</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon-wrapper movies-stat">
+          <mat-icon>movie</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ getTotalMoviesInFolders() }}</h3>
+          <p class="stat-label">Movies Organized</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Tabs Section -->
+  <mat-tab-group class="profile-tabs" animationDuration="300ms">
+    <!-- Favorites Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">favorite</mat-icon>
+        Favorites
+      </ng-template>
+      <div class="tab-content">
+        <div class="tab-header">
+          <div class="tab-header-text">
+            <h2>My Favorite Movies</h2>
+            <p class="tab-description">Quick access to all your favorite movies</p>
+          </div>
+          <button mat-raised-button color="primary" routerLink="/favorites">
+            <mat-icon>open_in_new</mat-icon>
+            View All Favorites
+          </button>
+        </div>
+
+        <div class="favorites-preview" *ngIf="user && user.favorites.length > 0">
+          <div class="movie-preview-grid">
+            <div *ngFor="let movie of user.favorites.slice(0, 6)" class="movie-preview-card">
+              <img [src]="movie.poster_path" [alt]="movie.title" class="movie-preview-poster">
+              <div class="movie-preview-info">
+                <h4>{{ movie.title }}</h4>
+                <p>{{ movie.release_date }}</p>
+              </div>
+            </div>
+          </div>
+          <p class="preview-note" *ngIf="user.favorites.length > 6">
+            + {{ user.favorites.length - 6 }} more favorites
+          </p>
+        </div>
+
+        <div class="empty-state" *ngIf="!user || user.favorites.length === 0">
+          <mat-icon>favorite_border</mat-icon>
+          <h3>No Favorites Yet</h3>
+          <p>Start adding movies to your favorites to see them here!</p>
+          <button mat-raised-button color="primary" routerLink="/movies">
+            <mat-icon>explore</mat-icon>
+            Browse Movies
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- My Folders Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">folder</mat-icon>
+        Collections
+      </ng-template>
+      <div class="tab-content">
+        <div class="tab-header">
+          <div class="tab-header-text">
+            <h2>My Movie Collections</h2>
+            <p class="tab-description">Organize your movies into custom collections</p>
+          </div>
+          <button mat-raised-button color="primary" (click)="createFolder()">
+            <mat-icon>add</mat-icon>
+            Create Collection
+          </button>
+        </div>
+
+        <div class="folders-grid" *ngIf="user && user.folders.length > 0">
+          <mat-card *ngFor="let folder of user.folders" class="folder-card">
+            <mat-card-header>
+              <div mat-card-avatar class="folder-avatar">
+                <mat-icon>folder_special</mat-icon>
+              </div>
+              <mat-card-title>{{ folder.title }}</mat-card-title>
+              <mat-card-subtitle>
+                <mat-icon class="subtitle-icon">movie</mat-icon>
+                {{ folder.movies.length }} {{ folder.movies.length === 1 ? 'movie' : 'movies' }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <p class="folder-description">{{ folder.description || 'No description provided' }}</p>
+              
+              <!-- Movie Thumbnails Preview -->
+              <div class="folder-movies-preview" *ngIf="folder.movies.length > 0">
+                <div class="movie-thumbnails">
+                  <img 
+                    *ngFor="let movie of folder.movies.slice(0, 4)" 
+                    [src]="movie.poster_path" 
+                    [alt]="movie.title"
+                    class="movie-thumbnail">
+                  <div *ngIf="folder.movies.length > 4" class="more-movies">
+                    +{{ folder.movies.length - 4 }}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="empty-folder" *ngIf="folder.movies.length === 0">
+                <mat-icon>movie_creation</mat-icon>
+                <p>No movies in this collection yet</p>
+              </div>
+            </mat-card-content>
+            
+            <mat-card-actions align="end">
+              <button mat-button (click)="editFolder(folder)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <button mat-button color="warn" (click)="deleteFolder(folder)">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+
+        <div class="empty-state" *ngIf="!user || user.folders.length === 0">
+          <mat-icon>folder_off</mat-icon>
+          <h3>No Collections Yet</h3>
+          <p>Create your first collection to organize your favorite movies!</p>
+          <button mat-raised-button color="primary" (click)="createFolder()">
+            <mat-icon>add</mat-icon>
+            Create Your First Collection
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Reviews Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">rate_review</mat-icon>
+        Reviews
+      </ng-template>
+      <div class="tab-content">
+        <div class="tab-header">
+          <div class="tab-header-text">
+            <h2>My Movie Reviews</h2>
+            <p class="tab-description">Your thoughts and ratings on movies you've watched</p>
+          </div>
+        </div>
+
+        <div class="reviews-list" *ngIf="user && user.reviews.length > 0">
+          <mat-card *ngFor="let review of user.reviews" class="review-card">
+            <mat-card-content>
+              <div class="review-header">
+                <div class="review-rating" [class.positive]="review.rating === 'thumbs_up'" [class.negative]="review.rating === 'thumbs_down'">
+                  <mat-icon>{{ review.rating === 'thumbs_up' ? 'thumb_up' : 'thumb_down' }}</mat-icon>
+                </div>
+                <div class="review-info">
+                  <h4>Movie ID: {{ review.movieId }}</h4>
+                  <p class="review-date">Reviewed recently</p>
+                </div>
+              </div>
+              <p class="review-comment">{{ review.comment }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="empty-state" *ngIf="!user || user.reviews.length === 0">
+          <mat-icon>rate_review</mat-icon>
+          <h3>No Reviews Yet</h3>
+          <p>Start reviewing movies to share your thoughts!</p>
+          <button mat-raised-button color="primary" routerLink="/movies">
+            <mat-icon>movie</mat-icon>
+            Browse Movies to Review
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Account Settings Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">settings</mat-icon>
+        Settings
+      </ng-template>
+      <div class="tab-content">
+        <div class="tab-header">
+          <div class="tab-header-text">
+            <h2>Account Settings</h2>
+            <p class="tab-description">Manage your account preferences</p>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>person</mat-icon>
+              <mat-card-title>Profile Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="setting-item">
+                <div class="setting-label">
+                  <mat-icon>account_circle</mat-icon>
+                  <span>Username</span>
+                </div>
+                <div class="setting-value">{{ user?.username }}</div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-label">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>Member Since</span>
+                </div>
+                <div class="setting-value">{{ getMemberSince() }}</div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>storage</mat-icon>
+              <mat-card-title>Data Management</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="settings-description">Manage your stored data and preferences</p>
+              <div class="settings-actions">
+                <button mat-stroked-button (click)="clearAllData()">
+                  <mat-icon>delete_sweep</mat-icon>
+                  Clear All Data
+                </button>
+                <button mat-stroked-button (click)="exportData()">
+                  <mat-icon>download</mat-icon>
+                  Export Data
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="settings-card danger-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>logout</mat-icon>
+              <mat-card-title>Account Actions</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="settings-description">Sign out of your account</p>
+              <button mat-raised-button color="warn" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                Logout
+              </button>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

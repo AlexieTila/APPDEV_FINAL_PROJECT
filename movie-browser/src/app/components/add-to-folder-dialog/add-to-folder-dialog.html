@@ -1,0 +1,52 @@
+<div class="add-to-folder-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>folder_open</mat-icon>
+      Add to Folder
+    </h2>
+    <button mat-icon-button (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="movie-info">
+      <img [src]="data.movie.poster_path" [alt]="data.movie.title" class="movie-poster">
+      <div class="movie-details">
+        <h3>{{ data.movie.title }}</h3>
+        <p>{{ data.movie.release_date }}</p>
+      </div>
+    </div>
+
+    <div class="folders-section">
+      <div class="section-header">
+        <h3>Select a Folder</h3>
+        <button mat-mini-fab color="primary" (click)="createNewFolder()" matTooltip="Create New Folder">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <mat-list *ngIf="folders.length > 0" class="folders-list">
+        <mat-list-item *ngFor="let folder of folders" (click)="selectFolder(folder)" class="folder-item">
+          <mat-icon matListItemIcon>folder</mat-icon>
+          <div matListItemTitle>{{ folder.title }}</div>
+          <div matListItemLine>{{ folder.description || 'No description' }}</div>
+          <div matListItemMeta class="folder-count">{{ folder.movies.length }} movies</div>
+        </mat-list-item>
+      </mat-list>
+
+      <div *ngIf="folders.length === 0" class="empty-folders">
+        <mat-icon>folder_off</mat-icon>
+        <p>No folders yet</p>
+        <button mat-raised-button color="primary" (click)="createNewFolder()">
+          <mat-icon>add</mat-icon>
+          Create Your First Folder
+        </button>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+  </mat-dialog-actions>
+</div>

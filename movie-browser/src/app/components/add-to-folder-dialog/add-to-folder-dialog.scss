@@ -1,0 +1,145 @@
+.add-to-folder-dialog {
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+
+    mat-icon {
+      color: var(--electric-purple);
+    }
+  }
+}
+
+mat-dialog-content {
+  padding: 20px 0;
+}
+
+.movie-info {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 12px;
+  margin-bottom: 24px;
+
+  .movie-poster {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .movie-details {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      color: var(--slate-gray);
+      font-size: 14px;
+    }
+  }
+}
+
+.folders-section {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--slate-gray);
+    }
+  }
+
+  .folders-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0;
+
+    .folder-item {
+      cursor: pointer;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+
+      &:hover {
+        background: rgba(139, 92, 246, 0.1);
+        border-color: var(--electric-purple);
+      }
+
+      .folder-count {
+        color: var(--slate-gray);
+        font-size: 12px;
+      }
+    }
+  }
+
+  .empty-folders {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: var(--slate-gray);
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--slate-gray);
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 0 0;
+}
+
+@media (max-width: 600px) {
+  .add-to-folder-dialog {
+    min-width: 320px;
+  }
+
+  .movie-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}

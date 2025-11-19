@@ -1,0 +1,39 @@
+<div class="folder-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ data.mode === 'create' ? 'create_new_folder' : 'edit' }}</mat-icon>
+      {{ data.mode === 'create' ? 'Create New Folder' : 'Edit Folder' }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Folder Name</mat-label>
+      <input matInput [(ngModel)]="folderName" placeholder="e.g., Action Movies" required>
+      <mat-icon matPrefix>folder</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput 
+                [(ngModel)]="folderDescription" 
+                placeholder="Add a description for this folder..."
+                rows="3"></textarea>
+      <mat-icon matPrefix>description</mat-icon>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="onSave()"
+            [disabled]="!folderName.trim()">
+      <mat-icon>{{ data.mode === 'create' ? 'add' : 'save' }}</mat-icon>
+      {{ data.mode === 'create' ? 'Create' : 'Save' }}
+    </button>
+  </mat-dialog-actions>
+</div>
