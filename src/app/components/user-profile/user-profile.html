@@ -1,0 +1,7 @@
+<mat-card *ngIf="user">
+  <mat-card-title>{{ user.username }}'s Profile</mat-card-title>
+  <app-favorites [favorites]="user.favorites"></app-favorites>
+  <app-folder *ngFor="let folder of user.folders" [folder]="folder"></app-folder>
+  <button mat-raised-button (click)="logout()">Logout</button>
+  <!-- Add form for creating folders -->
+</mat-card>

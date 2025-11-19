@@ -1,0 +1,10 @@
+<mat-form-field>
+  <mat-select [(ngModel)]="genre" placeholder="Genre">
+    <mat-option value="Action">Action</mat-option>
+    <!-- Add more options -->
+  </mat-select>
+</mat-form-field>
+<mat-form-field>
+  <input matInput [(ngModel)]="year" placeholder="Year">
+</mat-form-field>
+<button mat-raised-button (click)="onFilter()">Filter</button>
