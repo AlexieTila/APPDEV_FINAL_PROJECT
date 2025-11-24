@@ -1,21 +1,25 @@
 <div class="login-container">
   <mat-card>
-    <mat-card-title>{{ isSignupMode ? 'Create Account' : 'Welcome Back' }}</mat-card-title>
-    <p class="subtitle">{{ isSignupMode ? 'Join the ultimate movie experience' : 'Sign in to continue your journey' }}</p>
+    <mat-card-title>{{ isForgotPasswordMode ? 'Reset Password' : (isSignupMode ? 'Create Account' : 'Welcome Back') }}</mat-card-title>
+    <p class="subtitle">{{ isForgotPasswordMode ? 'Enter your email to receive reset instructions' : (isSignupMode ? 'Join the ultimate movie experience' : 'Sign in to continue your journey') }}</p>
     
     <mat-card-content>
       <form>
-        <mat-form-field appearance="outline" class="full-width">
+        <div *ngIf="successMessage" class="success-message">
+          {{ successMessage }}
+        </div>
+        
+        <mat-form-field appearance="outline" class="full-width" *ngIf="!isForgotPasswordMode">
           <mat-label>Username</mat-label>
           <input matInput [(ngModel)]="username" name="username" required autocomplete="username">
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width" *ngIf="isSignupMode">
+        <mat-form-field appearance="outline" class="full-width" *ngIf="isSignupMode || isForgotPasswordMode">
           <mat-label>Email</mat-label>
           <input matInput type="email" [(ngModel)]="email" name="email" required autocomplete="email">
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width" *ngIf="!isForgotPasswordMode">
           <mat-label>Password</mat-label>
           <input matInput type="password" [(ngModel)]="password" name="password" required autocomplete="current-password">
         </mat-form-field>
@@ -24,19 +28,23 @@
           <mat-label>Confirm Password</mat-label>
           <input matInput type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required autocomplete="new-password">
         </mat-form-field>
+        
+        <div class="forgot-password" *ngIf="!isSignupMode && !isForgotPasswordMode">
+          <a (click)="showForgotPassword()" class="forgot-link">Forgot Password?</a>
+        </div>
 
         <div class="button-container">
           <button mat-raised-button color="primary" type="button" 
-                  (click)="isSignupMode ? onSignup() : onLogin()">
-            {{ isSignupMode ? 'Create Account' : 'Sign In' }}
+                  (click)="isForgotPasswordMode ? onResetPassword() : (isSignupMode ? onSignup() : onLogin())">
+            {{ isForgotPasswordMode ? 'Reset Password' : (isSignupMode ? 'Create Account' : 'Sign In') }}
           </button>
         </div>
 
         <div class="toggle-mode">
           <p>
-            {{ isSignupMode ? 'Already have an account?' : "Don't have an account?" }}
-            <a (click)="toggleMode()" class="toggle-link">
-              {{ isSignupMode ? 'Sign In' : 'Sign Up' }}
+            {{ isForgotPasswordMode ? 'Remember your password?' : (isSignupMode ? 'Already have an account?' : "Don't have an account?") }}
+            <a (click)="isForgotPasswordMode ? backToLogin() : toggleMode()" class="toggle-link">
+              {{ isForgotPasswordMode ? 'Back to Sign In' : (isSignupMode ? 'Sign In' : 'Sign Up') }}
             </a>
           </p>
         </div>

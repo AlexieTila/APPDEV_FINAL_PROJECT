@@ -17,10 +17,12 @@ import { UserService } from '../../services/user.service';
 })
 export class Login {
   isSignupMode = false;
+  isForgotPasswordMode = false;
   username = '';
   password = '';
   email = '';
   confirmPassword = '';
+  successMessage = '';
 
   constructor(private userService: UserService, private router: Router) {}
 
@@ -48,8 +50,42 @@ export class Login {
     }
   }
 
+  onResetPassword() {
+    if (!this.email) {
+      alert('Please enter your email address');
+      return;
+    }
+
+    
+    const result = this.userService.resetPassword(this.email);
+    if (result.success) {
+      this.successMessage = result.message;
+      setTimeout(() => {
+        this.backToLogin();
+      }, 3000);
+    } else {
+      alert(result.message);
+    }
+  }
+
+  showForgotPassword() {
+    this.isForgotPasswordMode = true;
+    this.isSignupMode = false;
+    this.successMessage = '';
+    this.clearForm();
+  }
+
+  backToLogin() {
+    this.isForgotPasswordMode = false;
+    this.isSignupMode = false;
+    this.successMessage = '';
+    this.clearForm();
+  }
+
   toggleMode() {
     this.isSignupMode = !this.isSignupMode;
+    this.isForgotPasswordMode = false;
+    this.successMessage = '';
     this.clearForm();
   }
 

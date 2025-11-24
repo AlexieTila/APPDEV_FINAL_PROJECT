@@ -1,198 +1,134 @@
 import { Injectable } from '@angular/core';
-import { User, Folder, Review, Movie } from '../models/user.model';
+
+export interface User {
+  username: string;
+  password: string;
+  email: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private currentUser: User | null = null;
-  private users: { [key: string]: { password: string; user: User } } = {};
+  private readonly USERS_KEY = 'movie_users';
+  private readonly CURRENT_USER_KEY = 'current_user';
 
   constructor() {
-    // Load users from localStorage
-    const storedUsers = localStorage.getItem('users');
-    if (storedUsers) {
-      this.users = JSON.parse(storedUsers);
+    // Initialize with a default user if no users exist
+    if (!this.getUsers().length) {
+      this.signup('admin', 'admin123', 'admin@movieapp.com');
     }
   }
 
+  private getUsers(): User[] {
+    const users = localStorage.getItem(this.USERS_KEY);
+    return users ? JSON.parse(users) : [];
+  }
+
+  private saveUsers(users: User[]): void {
+    localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+  }
+
   signup(username: string, password: string, email: string): { success: boolean; message: string } {
-    // Validate inputs
-    if (!username || !password || !email) {
-      return { success: false, message: 'All fields are required' };
-    }
-
-    if (username.length < 3) {
-      return { success: false, message: 'Username must be at least 3 characters' };
-    }
-
-    if (password.length < 6) {
-      return { success: false, message: 'Password must be at least 6 characters' };
-    }
-
-    // Check if user already exists
-    if (this.users[username]) {
+    const users = this.getUsers();
+    
+    // Check if username already exists
+    if (users.find(u => u.username === username)) {
       return { success: false, message: 'Username already exists' };
     }
 
-    // Create new user
-    const newUser: User = {
-      id: Date.now(),
-      username,
-      favorites: [],
-      folders: [],
-      reviews: []
-    };
+    // Check if email already exists
+    if (users.find(u => u.email === email)) {
+      return { success: false, message: 'Email already registered' };
+    }
 
-    this.users[username] = { password, user: newUser };
-    localStorage.setItem('users', JSON.stringify(this.users));
-
+    // Add new user
+    users.push({ username, password, email });
+    this.saveUsers(users);
+    
     return { success: true, message: 'Account created successfully' };
   }
 
   login(username: string, password: string): boolean {
-    // Check stored users first
-    if (this.users[username] && this.users[username].password === password) {
-      this.currentUser = this.users[username].user;
-      localStorage.setItem('user', JSON.stringify(this.currentUser));
+    const users = this.getUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+      localStorage.setItem(this.CURRENT_USER_KEY, username);
       return true;
     }
-
-    // Mock login for default user
-    if (username === 'user' && password === 'pass') {
-      this.currentUser = { id: 1, username, favorites: [], folders: [], reviews: [] };
-      localStorage.setItem('user', JSON.stringify(this.currentUser));
-      return true;
-    }
-
+    
     return false;
   }
 
-  logout() {
-    this.currentUser = null;
-    localStorage.removeItem('user');
+  logout(): void {
+    localStorage.removeItem(this.CURRENT_USER_KEY);
   }
 
-  getCurrentUser(): User | null {
-    if (!this.currentUser) {
-      const user = localStorage.getItem('user');
-      this.currentUser = user ? JSON.parse(user) : null;
+  getCurrentUser(): string | null {
+    return localStorage.getItem(this.CURRENT_USER_KEY);
+  }
+
+  isLoggedIn(): boolean {
+    return this.getCurrentUser() !== null;
+  }
+
+  resetPassword(email: string): { success: boolean; message: string } {
+    const users = this.getUsers();
+    const user = users.find(u => u.email === email);
+    
+    if (!user) {
+      return { 
+        success: false, 
+        message: 'No account found with this email address' 
+      };
     }
-    return this.currentUser;
+    
+    // In a real application, you would:
+    // 1. Generate a secure reset token
+    // 2. Store it with an expiration time
+    // 3. Send an email with a reset link containing the token
+    // 4. Verify the token when the user clicks the link
+    // 5. Allow them to set a new password
+    
+    // For this demo, we'll just simulate the process
+    console.log(`Password reset email would be sent to: ${email}`);
+    console.log(`User: ${user.username}`);
+    
+    return { 
+      success: true, 
+      message: 'Password reset instructions have been sent to your email' 
+    };
   }
 
-  addToFavorites(movie: Movie) {
-    if (this.currentUser) {
-      // Check if movie is already in favorites
-      const exists = this.currentUser.favorites.some(m => m.id === movie.id);
-      if (!exists) {
-        this.currentUser.favorites.push(movie);
-        this.saveUser();
-        this.updateStoredUser();
-      }
+  // Method to actually change password (for future implementation)
+  changePassword(email: string, newPassword: string): { success: boolean; message: string } {
+    const users = this.getUsers();
+    const userIndex = users.findIndex(u => u.email === email);
+    
+    if (userIndex === -1) {
+      return { 
+        success: false, 
+        message: 'User not found' 
+      };
     }
+    
+    users[userIndex].password = newPassword;
+    this.saveUsers(users);
+    
+    return { 
+      success: true, 
+      message: 'Password updated successfully' 
+    };
   }
 
-  removeFromFavorites(movieId: number) {
-    if (this.currentUser) {
-      this.currentUser.favorites = this.currentUser.favorites.filter(m => m.id !== movieId);
-      this.saveUser();
-      this.updateStoredUser();
-    }
+  getUserByEmail(email: string): User | undefined {
+    const users = this.getUsers();
+    return users.find(u => u.email === email);
   }
 
-  isFavorite(movieId: number): boolean {
-    if (this.currentUser) {
-      return this.currentUser.favorites.some(m => m.id === movieId);
-    }
-    return false;
-  }
-
-  createFolder(title: string, description: string): Folder | null {
-    if (this.currentUser) {
-      const folder: Folder = { id: Date.now(), title, description, movies: [] };
-      this.currentUser.folders.push(folder);
-      this.saveUser();
-      this.updateStoredUser();
-      return folder;
-    }
-    return null;
-  }
-
-  updateFolder(folderId: number, title: string, description: string) {
-    if (this.currentUser) {
-      const folder = this.currentUser.folders.find(f => f.id === folderId);
-      if (folder) {
-        folder.title = title;
-        folder.description = description;
-        this.saveUser();
-        this.updateStoredUser();
-      }
-    }
-  }
-
-  deleteFolder(folderId: number) {
-    if (this.currentUser) {
-      this.currentUser.folders = this.currentUser.folders.filter(f => f.id !== folderId);
-      this.saveUser();
-      this.updateStoredUser();
-    }
-  }
-
-  addToFolder(folderId: number, movie: Movie) {
-    if (this.currentUser) {
-      const folder = this.currentUser.folders.find(f => f.id === folderId);
-      if (folder && !folder.movies.some(m => m.id === movie.id)) {
-        folder.movies.push(movie);
-        this.saveUser();
-        this.updateStoredUser();
-      }
-    }
-  }
-
-  removeFromFolder(folderId: number, movieId: number) {
-    if (this.currentUser) {
-      const folder = this.currentUser.folders.find(f => f.id === folderId);
-      if (folder) {
-        folder.movies = folder.movies.filter(m => m.id !== movieId);
-        this.saveUser();
-        this.updateStoredUser();
-      }
-    }
-  }
-
-  getFolders(): Folder[] {
-    return this.currentUser?.folders || [];
-  }
-
-  addReview(review: Review) {
-    if (this.currentUser) {
-      this.currentUser.reviews.push(review);
-      this.saveUser();
-      this.updateStoredUser();
-    }
-  }
-
-  updateProfilePicture(profilePicture: string) {
-    if (this.currentUser) {
-      this.currentUser.profilePicture = profilePicture;
-      this.saveUser();
-      this.updateStoredUser();
-    }
-  }
-
-  private saveUser() {
-    localStorage.setItem('user', JSON.stringify(this.currentUser));
-  }
-
-  private updateStoredUser() {
-    // Update the user in the users object as well
-    if (this.currentUser) {
-      const username = this.currentUser.username;
-      if (this.users[username]) {
-        this.users[username].user = this.currentUser;
-        localStorage.setItem('users', JSON.stringify(this.users));
-      }
-    }
+  getUserByUsername(username: string): User | undefined {
+    const users = this.getUsers();
+    return users.find(u => u.username === username);
   }
 }

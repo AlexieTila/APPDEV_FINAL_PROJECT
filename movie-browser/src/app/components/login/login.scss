@@ -266,6 +266,27 @@ form {
   flex-direction: column;
 }
 
+/* Forgot Password Link */
+.forgot-password {
+  text-align: right;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  
+  .forgot-link {
+    color: var(--electric-purple);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: var(--neon-pink);
+      text-decoration: underline;
+    }
+  }
+}
+
 /* Password strength indicator */
 .password-strength {
   margin-top: -12px;
@@ -337,11 +358,23 @@ form {
   display: flex;
   align-items: center;
   gap: 8px;
+  animation: slideDown 0.3s ease-out;
   
   &::before {
     content: '✓';
     font-size: 16px;
     font-weight: 700;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
