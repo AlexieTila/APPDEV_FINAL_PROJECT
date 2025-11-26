@@ -6,6 +6,7 @@ export type { Movie };
 export interface User {
   id: number;
   username: string;
+  email: string;
   profilePicture?: string;
   favorites: Movie[];
   folders: Folder[];
